@@ -84,11 +84,13 @@ Defaults use a local SQLite file (`database.db`). Change `SECRET_KEY` before any
 
 ### 4. Initialise the database (Python CLI)
 
-Creates tables (drops existing by default) **and seeds demo users**:
+Creates missing tables and seeds demo users. To reset the database first, pass `--drop`:
 
 ```bash
 python manage.py init
 ```
+
+**Reset warning:** `python manage.py init --drop` drops all application tables and their data before recreating and seeding them. This removes users, volunteer submissions, approvals, prize redemptions, and awards. Verify that `DATABASE_URI` points to the intended local database before running it.
 
 | Username | Password    | Role         |
 |----------|-------------|--------------|
@@ -98,8 +100,8 @@ python manage.py init
 Flags:
 
 ```bash
-python manage.py init --no-drop   # create/seed without dropping
-python manage.py init --no-seed   # tables only (skip demo users)
+python manage.py init --drop     # reset all tables, then create/seed
+python manage.py init --no-seed  # tables only (skip demo users)
 ```
 
 Seeding skips usernames that already exist. Add more rows in `cmd_seed` in `app/cli.py`. `python manage.py seed` still works if you only want to (re)insert demo users.
@@ -129,7 +131,8 @@ Commands are implemented in `app/cli.py` (stdlib `argparse`) and invoked via `ma
 
 | Command | Purpose |
 |---------|---------|
-| `python manage.py init` | Drop (default), create DB tables, and seed demo users |
+| `python manage.py init` | Create missing DB tables and seed demo users |
+| `python manage.py init --drop` | Drop all tables, recreate them, and seed demo data |
 | `python manage.py seed` | Insert demo users only (also part of `init`) |
 | `python manage.py run` | Start Uvicorn (reload unless `ENV=production`) |
 | `python manage.py users` | Print users in the DB |
@@ -140,11 +143,11 @@ Commands are implemented in `app/cli.py` (stdlib `argparse`) and invoked via `ma
 | `python manage.py skills-verify` | Check course skills against `.agents/skills.lock.json` |
 | `python manage.py --help` | Show all commands |
 
-Typical reset-and-start:
+Typical local reset-and-start:
 
 ```bash
 # venv activated, cwd = project root
-python manage.py init
+python manage.py init --drop
 python manage.py run
 ```
 
@@ -177,7 +180,7 @@ Service shape lives in [`render.yaml`](render.yaml) (Blueprint reference for the
 5. Start command (do not drop tables on each boot):
 
 ```bash
-python manage.py init --no-drop && python manage.py run --host 0.0.0.0 --port $PORT
+python manage.py init && python manage.py run --host 0.0.0.0 --port $PORT
 ```
 
 6. Confirm the deploy is live and `GET /health` succeeds. Put the public URL and the marker logins (username, password, role) in `docs/report.md`.

@@ -1,0 +1,39 @@
+{
+  "system": "Student Awards Platform",
+  "actors": [
+    {"name": "Student", "side": "left"},
+    {"name": "Admin", "side": "right"}
+  ],
+  "use_cases": [
+    {
+      "name": "Log Volunteer Hours",
+      "actors": ["Student"],
+      "includes": ["Check Points & Eligibility"],
+      "extends": []
+    },
+    {
+      "name": "Approve Volunteer Hours",
+      "actors": ["Admin"],
+      "includes": [],
+      "extends": ["Log Volunteer Hours"]
+    },
+    {
+      "name": "Check Points & Eligibility",
+      "actors": ["Student", "Admin"],
+      "includes": [],
+      "extends": []
+    },
+    {
+      "name": "View Leaderboard",
+      "actors": ["Student"],
+      "includes": [],
+      "extends": []
+    },
+    {
+      "name": "Redeem Prize",
+      "actors": ["Student"],
+      "includes": ["Check Points & Eligibility"],
+      "extends": []
+    }
+  ]
+}

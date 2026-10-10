@@ -1,0 +1,35 @@
+{% extends "authenticated-base.html" %}
+{% block title %}Prizes | Student Awards{% endblock %}
+
+{% block subpage_content %}
+<section class="workflow-page prizes-page">
+  <h1>Redeem Prize</h1>
+  <div class="balance-box">
+    <span>Your Balance:</span>
+    <strong>{{ balance|round(1) }} Hours</strong>
+  </div>
+
+  <div class="prize-grid">
+    {% for award in awards %}
+    <article class="prize-card">
+      <div class="prize-icon" aria-hidden="true">
+        <span class="material-symbols-outlined">redeem</span>
+      </div>
+      <div class="prize-details">
+        <h2>{{ award.name }}</h2>
+        <p>{{ award.description or "A reward for your volunteer contribution." }}</p>
+        <strong class="prize-cost">Cost: {{ award.cost_in_hours }} Hours</strong>
+      </div>
+      <form method="post" action="{{ url_for('redeem_award', award_id=award.id) }}">
+        <button type="submit" class="prize-redeem-button"
+                {% if award.quantity_available == 0 or balance < award.cost_in_hours %}disabled{% endif %}>
+          Redeem
+        </button>
+      </form>
+    </article>
+    {% else %}
+    <p class="empty-prizes">No prizes are currently available.</p>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

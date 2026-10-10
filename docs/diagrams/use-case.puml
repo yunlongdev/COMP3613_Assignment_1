@@ -1,0 +1,35 @@
+@startuml
+!pragma layout smetana
+skinparam shadowing false
+skinparam actorBorderColor #1B365D
+skinparam actorFontColor #1E232D
+skinparam usecaseBackgroundColor #FFFFFF
+skinparam usecaseBorderColor #1B365D
+skinparam usecaseFontColor #1E232D
+skinparam rectangleBorderColor #1B365D
+skinparam rectangleBackgroundColor #F8FAFC
+skinparam arrowColor #1B365D
+
+actor "Student" as Student
+
+rectangle "Student Awards Platform" {
+  usecase "Log Volunteer Hours" as Log_Volunteer_Hours
+  usecase "Approve Volunteer Hours" as Approve_Volunteer_Hours
+  usecase "Check Points & Eligibility" as Check_Points_Eligibility
+  usecase "View Leaderboard" as View_Leaderboard
+  usecase "Redeem Prize" as Redeem_Prize
+}
+
+actor "Admin" as Admin
+
+Student --> Log_Volunteer_Hours
+Log_Volunteer_Hours ..> Check_Points_Eligibility : <<include>>
+Approve_Volunteer_Hours <-- Admin
+Approve_Volunteer_Hours ..> Log_Volunteer_Hours : <<extend>>
+Student --> Check_Points_Eligibility
+Check_Points_Eligibility <-- Admin
+Student --> View_Leaderboard
+Student --> Redeem_Prize
+Redeem_Prize ..> Check_Points_Eligibility : <<include>>
+
+@enduml

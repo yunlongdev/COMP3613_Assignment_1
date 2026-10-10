@@ -34,8 +34,22 @@ _ENV_FILE = Path(".env")
 @lru_cache
 def get_settings():
     path = resolve_dotenv_path()
-    # Re-bind env_file each call so clearing the cache picks up a new .env.
-    return Settings(_env_file=path if path is not None else _env_files_for_settings())
+    candidates = [path] if path is not None else list(_env_files_for_settings())
+    values: dict[str, str] = {}
+    for candidate in candidates:
+        env_path = Path(candidate)
+        if not env_path.is_file():
+            continue
+        for raw_line in env_path.read_text(encoding="utf-8").splitlines():
+            line = raw_line.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            key, value = line.split("=", 1)
+            values[key.strip()] = value.strip().strip('"').strip("'")
+    for key, value in os.environ.items():
+        if key in {"DATABASE_URI", "SECRET_KEY", "ENV", "APP_PORT", "CONFIG_PASSWORD"}:
+            values[key] = value
+    return Settings(**values)
 
 
 def clear_settings_cache() -> None:
@@ -118,7 +132,7 @@ class Settings(BaseSettings):
         return value
 
     model_config = SettingsConfigDict(
-        env_file=_env_files_for_settings(),
+        env_file=None,
         env_file_encoding="utf-8",
         extra="ignore",
     )

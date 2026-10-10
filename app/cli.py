@@ -23,14 +23,13 @@ def _ensure_models_loaded() -> None:
 
 
 def cmd_init(args: argparse.Namespace) -> None:
-    """Create database tables (drops existing by default) and seed demo users."""
+    """Create database tables and seed demo users, optionally dropping existing tables."""
     from app.config import get_settings
     from app.database import drop_all, ensure_db_and_tables
 
     _ensure_models_loaded()
     if args.drop:
         print("Dropping all tables…")
-        # Drop can fail on a brand-new empty DB; create path still retries.
         try:
             drop_all()
         except Exception as exc:  # noqa: BLE001
@@ -53,6 +52,8 @@ def cmd_seed(args: argparse.Namespace) -> None:
     admin / adminpass   (admin)
     """
     from app.database import ensure_db_and_tables, get_cli_session
+    from app.models.user import Award
+    from app.repositories.awards import AwardRepository
     from app.repositories.user import UserRepository
     from app.schemas.user import AdminCreate, RegularUserCreate
     from app.utilities.security import encrypt_password
@@ -69,6 +70,7 @@ def cmd_seed(args: argparse.Namespace) -> None:
     skipped = 0
     with get_cli_session() as session:
         repo = UserRepository(session)
+        award_repo = AwardRepository(session)
         for username, email, password, role in demo_users:
             if repo.get_by_username(username):
                 print(f"  skip  {username} (already exists)")
@@ -86,9 +88,27 @@ def cmd_seed(args: argparse.Namespace) -> None:
             print(f"  create {username} ({role})")
             created += 1
 
-    print(f"Seed done — created {created}, skipped {skipped}.")
-    print("Login with bob/bobpass or admin/adminpass")
+        demo_awards = [
+            ("Campus Caf? Voucher", "A drink and snack pass for student volunteers.", 15, 10),
+            ("Library Study Bundle", "A premium stationery pack and quiet-study rewards.", 25, 10),
+            ("Community Festival Ticket", "Priority access to the annual student awards celebration.", 40, 10),
+        ]
+        from sqlmodel import select
+        for name, description, cost, stock in demo_awards:
+            existing = session.exec(select(Award)).all()
+            if not any(item.name == name for item in existing):
+                award_repo.create(
+                    Award(
+                        name=name,
+                        description=description,
+                        cost_in_hours=cost,
+                        quantity_available=stock,
+                    )
+                )
+                print(f"  create award {name} ({cost} hours)")
 
+    print(f"Seed done ? created {created}, skipped {skipped}.")
+    print("Login with bob/bobpass or admin/adminpass")
 
 def cmd_run(args: argparse.Namespace) -> None:
     """Start the FastAPI app with Uvicorn."""
@@ -207,109 +227,61 @@ def cmd_users(args: argparse.Namespace) -> None:
             return
         for user in users:
             print(
-                f"  id={user.id}  username={user.username}  "
-                f"role={user.role}  email={user.email}"
+                f"  id={user.id}  username={user.username}  email={user.email}  role={user.role}"
             )
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(
-        prog="python manage.py",
-        description="FastStarter Python CLI — init database, seed demo data, run the app.",
-    )
-    sub = parser.add_subparsers(dest="command", required=True)
+    parser = argparse.ArgumentParser(description="FastStarter project CLI")
+    subparsers = parser.add_subparsers(dest="command", required=True)
 
-    p_init = sub.add_parser(
-        "init",
-        help="Create DB tables and seed demo users (drops existing tables by default)",
-    )
-    p_init.add_argument(
-        "--no-drop",
-        dest="drop",
-        action="store_false",
-        help="Create tables without dropping existing ones",
-    )
-    p_init.add_argument(
-        "--no-seed",
-        dest="seed",
-        action="store_false",
-        help="Skip demo user seed after creating tables",
-    )
-    p_init.set_defaults(drop=True, seed=True, func=cmd_init)
+    init = subparsers.add_parser("init", help="Create database tables and seed demo users")
+    init.add_argument("--drop", action="store_true", help="Drop existing tables before creating them")
+    init.add_argument("--no-seed", action="store_false", dest="seed", help="Skip seed data")
+    init.set_defaults(func=cmd_init)
 
-    p_seed = sub.add_parser(
-        "seed",
-        help="Insert demo users only (idempotent; also runs as part of init)",
-    )
-    p_seed.set_defaults(func=cmd_seed)
+    run = subparsers.add_parser("run", help="Start FastAPI app")
+    run.add_argument("--host", default=None)
+    run.add_argument("--port", type=int, default=None)
+    run.add_argument("--reload", action="store_true", default=None, help="Force reload mode")
+    run.set_defaults(func=cmd_run)
 
-    p_run = sub.add_parser("run", help="Start the web app (uvicorn)")
-    p_run.add_argument("--host", default=None, help="Bind host")
-    p_run.add_argument("--port", type=int, default=None, help="Bind port")
-    reload_group = p_run.add_mutually_exclusive_group()
-    reload_group.add_argument(
-        "--reload", dest="reload", action="store_true", default=None, help="Enable auto-reload"
-    )
-    reload_group.add_argument(
-        "--no-reload", dest="reload", action="store_false", help="Disable auto-reload"
-    )
-    p_run.set_defaults(func=cmd_run, reload=None)
+    seed = subparsers.add_parser("seed", help="Insert demo users")
+    seed.set_defaults(func=cmd_seed)
 
-    p_users = sub.add_parser("users", help="List users in the database")
-    p_users.set_defaults(func=cmd_users)
+    report = subparsers.add_parser("report", help="Build the assignment report bundle")
+    report.add_argument("--name", required=True)
+    report.add_argument("--id", dest="student_id", required=True)
+    report.add_argument("--src", default=None)
+    report.add_argument("--output", default=None)
+    report.set_defaults(func=cmd_report)
 
-    p_report = sub.add_parser(
-        "report",
-        help=(
-            "Build submission package: merge docs/judge.md, package docs/transcripts/, "
-            "write docs/report.pdf (Guide pulls chats + runs student-judge first)"
-        ),
-    )
-    p_report.add_argument("--name", required=True, help="Student name (printed on the PDF cover)")
-    p_report.add_argument("--id", dest="student_id", required=True, help="Student ID (PDF only)")
-    p_report.add_argument("--src", default=None, help="Markdown path (default: docs/report.md)")
-    p_report.add_argument("--output", default=None, help="PDF path (default: docs/report.pdf)")
-    p_report.set_defaults(func=cmd_report)
+    transcripts = subparsers.add_parser("transcripts", help="Package transcript markdown")
+    transcripts.add_argument("--no-zip", action="store_true")
+    transcripts.set_defaults(func=cmd_transcripts)
 
-    p_transcripts = sub.add_parser(
-        "transcripts",
-        help="Package agent-written docs/transcripts/*.md into INDEX + zip (no IDE scrape)",
-    )
-    p_transcripts.add_argument(
-        "--no-zip",
-        action="store_true",
-        help="Skip writing docs/transcripts.zip",
-    )
-    p_transcripts.set_defaults(func=cmd_transcripts)
+    verify = subparsers.add_parser("skills-verify", help="Verify skill integrity")
+    verify.set_defaults(func=cmd_skills_verify)
 
-    p_usecase = sub.add_parser(
-        "usecase",
-        help="Render docs/diagrams/use-case.json to a UML use-case PNG",
-    )
-    p_usecase.add_argument("--spec", default=None, help="JSON spec (default: docs/diagrams/use-case.json)")
-    p_usecase.add_argument("--output", default=None, help="PNG path (default: docs/diagrams/use-case.png)")
-    p_usecase.set_defaults(func=cmd_usecase)
+    usecase = subparsers.add_parser("usecase", help="Render use-case UML diagram")
+    usecase.add_argument("--spec", default=None)
+    usecase.add_argument("--output", default=None)
+    usecase.set_defaults(func=cmd_usecase)
 
-    p_skills_verify = sub.add_parser(
-        "skills-verify",
-        help="Check course skills against .agents/skills.lock.json",
-    )
-    p_skills_verify.set_defaults(func=cmd_skills_verify)
+    lock = subparsers.add_parser("skills-lock", help="Rewrite skill lock file")
+    lock.set_defaults(func=cmd_skills_lock)
 
-    p_skills_lock = sub.add_parser(
-        "skills-lock",
-        help="Rewrite .agents/skills.lock.json (course authors; needs FASTSTARTER_SKILLS_LOCK=1)",
-    )
-    p_skills_lock.set_defaults(func=cmd_skills_lock)
+    users = subparsers.add_parser("users", help="List users in the database")
+    users.set_defaults(func=cmd_users)
 
     return parser
 
 
-def main(argv: list[str] | None = None) -> None:
+def main() -> None:
     parser = build_parser()
-    args = parser.parse_args(argv)
+    args = parser.parse_args()
     args.func(args)
 
 
 if __name__ == "__main__":
-    main(sys.argv[1:])
+    main()

@@ -1,0 +1,33 @@
+{% extends "authenticated-base.html" %}
+{% block title %}Leaderboard | Student Awards{% endblock %}
+
+{% block subpage_content %}
+<section class="workflow-page leaderboard-page">
+  <h1>Leaderboard</h1>
+  <div class="leaderboard-table-wrap">
+    <table class="leaderboard-table">
+      <thead>
+        <tr>
+          <th scope="col">Rank</th>
+          <th scope="col">Student Name</th>
+          <th scope="col">Total Approved Hours</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for student, total_hours in leaderboard %}
+        <tr>
+          <td>{{ loop.index }}</td>
+          <td><span class="student-avatar" aria-hidden="true">{{ student.username[:1]|upper }}</span>{{ student.username }}</td>
+          <td>{{ total_hours|round(1) }}</td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="3" class="muted-row">No approved volunteer hours yet.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <p class="page-note">Approved volunteer hours appear here.</p>
+</section>
+{% endblock %}

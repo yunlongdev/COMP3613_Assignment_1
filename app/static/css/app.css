@@ -1,14 +1,13 @@
 :root {
-  /* Phase 5 theming: Guide overwrites these from docs/report.md preferences */
-  --brand-name: "FastStarter";
-  --brand-bg: #0c1218;
-  --brand-surface: #f7f4ef;
-  --brand-ink: #14202b;
-  --brand-muted: #6a7a88;
-  --brand-accent: #c45c26;
-  --brand-accent-2: #2a6f6b;
-  --brand-sidebar: #14202b;
-  --brand-sidebar-text: #a8b4bf;
+  --brand-name: "Student Awards";
+  --brand-bg: #0e1d2a;
+  --brand-surface: #f7f5f1;
+  --brand-ink: #163047;
+  --brand-muted: #64748b;
+  --brand-accent: #d97706;
+  --brand-accent-2: #1d7a73;
+  --brand-sidebar: #11263d;
+  --brand-sidebar-text: #dbe6ee;
   --brand-font-display: "Fraunces", Georgia, serif;
   --brand-font-body: "Source Sans 3", "Segoe UI", sans-serif;
   --brand-radius: 0.85rem;
@@ -33,17 +32,16 @@ body {
   letter-spacing: -0.03em;
 }
 
-/* —— Public landing —— */
 .landing {
   min-height: 100vh;
   display: grid;
   grid-template-rows: auto 1fr auto;
   color: var(--brand-surface);
   background:
-    linear-gradient(160deg, rgba(12, 18, 24, 0.55), rgba(12, 18, 24, 0.82)),
-    radial-gradient(ellipse 80% 60% at 15% 20%, rgba(42, 111, 107, 0.45), transparent 55%),
-    radial-gradient(ellipse 70% 50% at 90% 80%, rgba(196, 92, 38, 0.28), transparent 50%),
-    linear-gradient(180deg, #1a2834 0%, #0c1218 100%);
+    linear-gradient(160deg, rgba(13, 29, 42, 0.72), rgba(13, 29, 42, 0.88)),
+    radial-gradient(ellipse 80% 60% at 15% 20%, rgba(29, 122, 115, 0.42), transparent 55%),
+    radial-gradient(ellipse 70% 50% at 90% 80%, rgba(217, 119, 6, 0.28), transparent 50%),
+    linear-gradient(180deg, #17314d 0%, #0e1d2a 100%);
   position: relative;
   overflow: hidden;
 }
@@ -52,14 +50,7 @@ body {
   content: "";
   position: absolute;
   inset: 0;
-  background-image:
-    repeating-linear-gradient(
-      -18deg,
-      transparent,
-      transparent 48px,
-      rgba(247, 244, 239, 0.025) 48px,
-      rgba(247, 244, 239, 0.025) 49px
-    );
+  background-image: repeating-linear-gradient(-18deg, transparent, transparent 48px, rgba(247, 245, 241, 0.025) 48px, rgba(247, 245, 241, 0.025) 49px);
   pointer-events: none;
 }
 
@@ -101,7 +92,7 @@ body {
   font-size: 0.8rem;
   text-transform: uppercase;
   letter-spacing: 0.14em;
-  color: color-mix(in srgb, var(--brand-surface) 65%, var(--brand-accent-2));
+  color: #d0e3e1;
   margin: 0 0 1rem;
 }
 
@@ -115,9 +106,9 @@ body {
 .landing-lead {
   font-size: clamp(1.05rem, 2.2vw, 1.25rem);
   line-height: 1.55;
-  color: color-mix(in srgb, var(--brand-surface) 78%, transparent);
+  color: rgba(247, 245, 241, 0.85);
   margin: 0 0 2rem;
-  max-width: 28rem;
+  max-width: 30rem;
 }
 
 .landing-cta {
@@ -144,30 +135,30 @@ body {
 
 .btn-landing-primary {
   background: var(--brand-accent);
-  color: #fff8f3;
+  color: #fff9f3;
 }
 
 .btn-landing-primary:hover {
-  background: color-mix(in srgb, var(--brand-accent) 85%, #000);
+  background: #bb6200;
   color: #fff;
 }
 
 .btn-landing-ghost {
   background: transparent;
   color: var(--brand-surface);
-  border-color: color-mix(in srgb, var(--brand-surface) 45%, transparent);
+  border-color: rgba(247, 245, 241, 0.38);
 }
 
 .btn-landing-ghost:hover {
   border-color: var(--brand-surface);
-  background: color-mix(in srgb, var(--brand-surface) 8%, transparent);
+  background: rgba(247, 245, 241, 0.08);
   color: var(--brand-surface);
 }
 
 .landing-foot {
   padding: 1.25rem clamp(1.25rem, 4vw, 3rem) 1.75rem;
   font-size: 0.85rem;
-  color: color-mix(in srgb, var(--brand-surface) 45%, transparent);
+  color: rgba(247, 245, 241, 0.62);
 }
 
 .landing-orb {
@@ -177,10 +168,7 @@ body {
   border-radius: 50%;
   right: -6%;
   top: 18%;
-  background:
-    radial-gradient(circle at 35% 35%, rgba(247, 244, 239, 0.18), transparent 55%),
-    radial-gradient(circle at 70% 70%, rgba(42, 111, 107, 0.5), transparent 60%),
-    rgba(196, 92, 38, 0.15);
+  background: radial-gradient(circle at 35% 35%, rgba(247, 245, 241, 0.12), transparent 55%), radial-gradient(circle at 70% 70%, rgba(29, 122, 115, 0.52), transparent 60%), rgba(217, 119, 6, 0.2);
   filter: blur(2px);
   animation: landing-drift 14s ease-in-out infinite alternate;
   pointer-events: none;
@@ -212,17 +200,13 @@ body {
   }
 }
 
-/* —— Auth —— */
 .auth-shell {
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 1.5rem;
-  background:
-    radial-gradient(ellipse at top left, color-mix(in srgb, var(--brand-accent-2) 35%, transparent), transparent 55%),
-    radial-gradient(ellipse at bottom right, color-mix(in srgb, var(--brand-accent) 28%, transparent), transparent 50%),
-    var(--brand-bg);
+  background: radial-gradient(ellipse at top left, rgba(29, 122, 115, 0.32), transparent 55%), radial-gradient(ellipse at bottom right, rgba(217, 119, 6, 0.22), transparent 50%), var(--brand-bg);
 }
 
 .auth-panel {
@@ -251,13 +235,13 @@ body {
 }
 
 .auth-panel .btn-primary:hover {
-  background: color-mix(in srgb, var(--brand-accent) 85%, #000);
-  border-color: color-mix(in srgb, var(--brand-accent) 85%, #000);
+  background: #bb6200;
+  border-color: #bb6200;
 }
 
 .auth-panel .btn-outline-secondary {
   color: var(--brand-ink);
-  border-color: color-mix(in srgb, var(--brand-ink) 25%, transparent);
+  border-color: rgba(22, 48, 71, 0.2);
 }
 
 .auth-back {
@@ -270,4 +254,742 @@ body {
 
 .auth-back:hover {
   color: var(--brand-accent);
+}
+
+.student-awards-dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.top-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.stat-card,
+.panel {
+  background: #fff;
+  border-radius: 1rem;
+  box-shadow: 0 8px 20px rgba(17, 38, 61, 0.08);
+  border: 1px solid rgba(17, 38, 61, 0.05);
+}
+
+.stat-card {
+  padding: 1.1rem 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.stat-card.accent {
+  background: linear-gradient(135deg, rgba(217, 119, 6, 0.1), rgba(29, 122, 115, 0.08));
+}
+
+.stat-label {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--brand-muted);
+}
+
+.stat-card strong {
+  font-size: 1.8rem;
+  line-height: 1;
+}
+
+.panel {
+  padding: 1.2rem;
+}
+
+.panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.8rem;
+}
+
+.panel-head h2 {
+  font-size: 1.1rem;
+  margin: 0;
+  font-weight: 700;
+}
+
+.awards-form input,
+.awards-form textarea {
+  width: 100%;
+  border: 1px solid rgba(17, 38, 61, 0.14);
+  border-radius: 0.7rem;
+  padding: 0.7rem 0.8rem;
+}
+
+.btn-primary-wide,
+.reward-card button,
+.btn-success-small,
+.btn-secondary-small {
+  border: none;
+  border-radius: 0.7rem;
+  font-weight: 600;
+  transition: opacity 0.2s ease;
+}
+
+.btn-primary-wide {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  background: var(--brand-accent);
+  color: #fff;
+}
+
+.reward-list,
+.leaderboard-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding-left: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.reward-card {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  align-items: center;
+  background: #f8fafc;
+  border: 1px solid rgba(17, 38, 61, 0.08);
+  border-radius: 0.85rem;
+  padding: 0.8rem 0.9rem;
+}
+
+.reward-card.out {
+  opacity: 0.6;
+}
+
+.reward-card strong,
+.leaderboard-list strong {
+  display: block;
+}
+
+.reward-card small {
+  color: var(--brand-muted);
+}
+
+.reward-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
+}
+
+.reward-card button,
+.btn-success-small,
+.btn-secondary-small {
+  padding: 0.5rem 0.8rem;
+}
+
+.reward-card button,
+.btn-success-small {
+  background: var(--brand-accent-2);
+  color: #fff;
+}
+
+.btn-secondary-small {
+  background: #edf2f7;
+  color: var(--brand-ink);
+}
+
+.reward-card button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.leaderboard-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+  padding: 0.55rem 0.7rem;
+  border-radius: 0.7rem;
+  background: #f8fafc;
+}
+
+.rank {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: rgba(29, 122, 115, 0.12);
+  color: var(--brand-accent-2);
+  font-size: 0.75rem;
+  font-weight: 700;
+  margin-right: 0.4rem;
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  padding: 0.8rem 0.6rem;
+  border-bottom: 1px solid rgba(17, 38, 61, 0.08);
+  text-align: left;
+}
+
+th {
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--brand-muted);
+}
+
+.status-pill {
+  display: inline-flex;
+  padding: 0.3rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.status-pill.pending {
+  background: rgba(217, 119, 6, 0.1);
+  color: #9a5d0c;
+}
+
+.status-pill.approved {
+  background: rgba(29, 122, 115, 0.12);
+  color: #0e675d;
+}
+
+.status-pill.rejected {
+  background: rgba(220, 53, 69, 0.1);
+  color: #b02a37;
+}
+
+.muted-row {
+  color: var(--brand-muted);
+  text-align: center;
+}
+
+.action-row {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 991px) {
+  .top-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.app-shell {
+  min-height: 100vh;
+  background: var(--brand-surface);
+}
+
+.app-header {
+  min-height: 4.5rem;
+  display: flex;
+  align-items: center;
+  gap: clamp(1rem, 3vw, 2.5rem);
+  padding: 0.75rem clamp(1rem, 4vw, 3rem);
+  background: var(--brand-surface);
+  border-bottom: 1px solid rgba(22, 48, 71, 0.12);
+  box-shadow: 0 3px 12px rgba(17, 38, 61, 0.06);
+}
+
+.app-wordmark {
+  flex: 0 0 auto;
+  color: var(--brand-ink);
+  font-family: var(--brand-font-display);
+  font-size: 1.25rem;
+  font-weight: 650;
+  text-decoration: none;
+}
+
+.app-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  align-self: stretch;
+  gap: clamp(0.75rem, 2vw, 2rem);
+}
+
+.app-nav a,
+.header-utility-link {
+  color: var(--brand-ink);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.app-nav a {
+  display: inline-flex;
+  align-items: center;
+  border-bottom: 3px solid transparent;
+  padding: 0.5rem 0.1rem;
+}
+
+.app-nav a:hover,
+.app-nav a.active {
+  color: var(--brand-accent-2);
+  border-bottom-color: var(--brand-accent);
+}
+
+.app-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-left: auto;
+}
+
+.header-greeting {
+  color: var(--brand-muted);
+  white-space: nowrap;
+}
+
+.app-content {
+  width: min(100% - 2rem, 72rem);
+  min-height: calc(100vh - 4.5rem);
+  margin: 0 auto;
+  padding: clamp(1.5rem, 4vw, 3rem) 0;
+  background: var(--brand-surface);
+}
+
+.workflow-page h1 {
+  margin: 0 0 1.5rem;
+  color: var(--brand-ink);
+  font-family: var(--brand-font-display);
+  font-size: clamp(1.7rem, 3vw, 2.1rem);
+  font-weight: 650;
+}
+
+.log-hours-form {
+  display: grid;
+  gap: 1.25rem;
+  max-width: 42rem;
+}
+
+.form-field {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.form-field label {
+  color: var(--brand-ink);
+  font-weight: 700;
+}
+
+.awards-form input,
+.awards-form textarea {
+  min-height: 2.9rem;
+  background: #fff;
+  color: var(--brand-ink);
+}
+
+.awards-form textarea {
+  min-height: 8rem;
+  resize: vertical;
+}
+
+.form-field-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.form-status-note,
+.page-note {
+  margin: 0;
+  color: var(--brand-muted);
+  text-align: center;
+}
+
+.leaderboard-table-wrap {
+  overflow-x: auto;
+  border: 1px solid rgba(17, 38, 61, 0.12);
+  border-radius: var(--brand-radius);
+  background: #fff;
+  box-shadow: 0 8px 20px rgba(17, 38, 61, 0.08);
+}
+
+.leaderboard-table {
+  min-width: 34rem;
+}
+
+.leaderboard-table th {
+  background: rgba(22, 48, 71, 0.06);
+  color: var(--brand-ink);
+  text-transform: none;
+  font-size: 0.95rem;
+  letter-spacing: normal;
+}
+
+.leaderboard-table td {
+  height: 4rem;
+}
+
+.leaderboard-table td:first-child,
+.leaderboard-table td:last-child {
+  text-align: center;
+}
+
+.student-avatar {
+  display: inline-grid;
+  width: 2rem;
+  height: 2rem;
+  margin-right: 0.65rem;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(29, 122, 115, 0.14);
+  color: var(--brand-accent-2);
+  font-weight: 700;
+}
+
+.page-note {
+  margin-top: 1.5rem;
+}
+
+.balance-box {
+  display: flex;
+  justify-content: center;
+  gap: 0.4rem;
+  width: fit-content;
+  min-width: 19rem;
+  margin-bottom: 1.5rem;
+  padding: 0.9rem 1.5rem;
+  border: 1px solid rgba(29, 122, 115, 0.2);
+  border-radius: 0.75rem;
+  background: linear-gradient(135deg, rgba(217, 119, 6, 0.1), rgba(29, 122, 115, 0.08));
+  color: var(--brand-ink);
+  font-size: 1.05rem;
+}
+
+.balance-box strong {
+  color: var(--brand-accent-2);
+}
+
+.prize-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 30rem), 1fr));
+  gap: 1rem;
+}
+
+.prize-card {
+  display: grid;
+  grid-template-columns: 6rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid rgba(17, 38, 61, 0.1);
+  border-radius: var(--brand-radius);
+  background: #fff;
+  box-shadow: 0 8px 20px rgba(17, 38, 61, 0.07);
+}
+
+.prize-icon {
+  display: grid;
+  width: 6rem;
+  height: 6rem;
+  place-items: center;
+  border-radius: 0.65rem;
+  background: rgba(29, 122, 115, 0.1);
+  color: var(--brand-accent-2);
+}
+
+.prize-icon .material-symbols-outlined {
+  font-size: 2.6rem;
+}
+
+.prize-details h2 {
+  margin: 0 0 0.25rem;
+  color: var(--brand-ink);
+  font-size: 1.1rem;
+}
+
+.prize-details p {
+  margin: 0 0 0.5rem;
+  color: var(--brand-muted);
+}
+
+.prize-cost {
+  color: var(--brand-ink);
+}
+
+.prize-redeem-button {
+  min-width: 7rem;
+  padding: 0.6rem 1rem;
+  border: 0;
+  border-radius: 0.65rem;
+  background: var(--brand-accent);
+  color: #fff;
+  font-weight: 700;
+}
+
+.prize-redeem-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.empty-prizes {
+  margin: 0;
+  padding: 1.5rem;
+  border-radius: var(--brand-radius);
+  background: #fff;
+  color: var(--brand-muted);
+  text-align: center;
+}
+
+@media (max-width: 760px) {
+  .app-header {
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+  }
+
+  .app-nav {
+    order: 3;
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .app-header-actions {
+    gap: 0.6rem;
+  }
+
+  .header-greeting {
+    display: none;
+  }
+
+  .app-content {
+    min-height: calc(100vh - 7rem);
+  }
+}
+
+@media (max-width: 560px) {
+  .form-field-pair {
+    grid-template-columns: 1fr;
+  }
+
+  .prize-card {
+    grid-template-columns: 4.5rem minmax(0, 1fr);
+  }
+
+  .prize-icon {
+    width: 4.5rem;
+    height: 4.5rem;
+  }
+
+  .prize-card form {
+    grid-column: 2;
+  }
+
+  .prize-redeem-button {
+    width: 100%;
+  }
+}
+
+body:has(.app-shell) {
+  background: #edf1f3;
+}
+
+.app-shell {
+  min-height: 100vh;
+  background: #edf1f3;
+  color: var(--brand-ink);
+}
+
+.app-header {
+  min-height: 4.5rem;
+  padding-inline: clamp(1rem, 5vw, 4rem);
+  background: #fff;
+}
+
+.app-nav {
+  gap: clamp(0.35rem, 1.5vw, 1.5rem);
+}
+
+.app-shell .app-nav a {
+  min-height: 2.7rem;
+  padding: 0.55rem 0.9rem;
+  border: 1px solid transparent;
+  border-radius: 0.65rem;
+  color: var(--brand-ink);
+  font-weight: 700;
+  text-decoration: none;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.app-shell .app-nav a:hover {
+  border-color: rgba(29, 122, 115, 0.25);
+  background: rgba(29, 122, 115, 0.08);
+  color: var(--brand-accent-2);
+}
+
+.app-shell .app-nav a.active {
+  border-color: var(--brand-accent-2);
+  background: var(--brand-accent-2);
+  color: #fff;
+}
+
+.app-content {
+  width: min(100% - 2rem, 68rem);
+  min-height: 0;
+  margin: clamp(1.5rem, 4vh, 3rem) auto;
+  padding: 0;
+  background: transparent;
+}
+
+.app-content > .alert {
+  width: min(100%, 56rem);
+  margin: 0 auto 1rem;
+}
+
+.app-content .workflow-page {
+  width: min(100%, 56rem);
+  margin: 0 auto;
+  padding: clamp(1.5rem, 4vw, 2.5rem);
+  border: 1px solid rgba(22, 48, 71, 0.08);
+  border-radius: 1rem;
+  background: #fff;
+  box-shadow: 0 12px 32px rgba(17, 38, 61, 0.1);
+  color: var(--brand-ink);
+}
+
+.app-content .workflow-page h1 {
+  margin: 0 0 1.5rem;
+  color: var(--brand-ink);
+  line-height: 1.2;
+}
+
+.app-content .log-hours-page {
+  width: min(100%, 46rem);
+}
+
+.app-content .log-hours-form {
+  width: 100%;
+  max-width: 34rem;
+  margin: 0 auto;
+  gap: 1.1rem;
+}
+
+.app-content .form-field {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.app-content .form-field label {
+  display: block;
+  margin: 0;
+  color: var(--brand-ink);
+  font-size: 0.98rem;
+  line-height: 1.35;
+}
+
+.app-content .form-field-pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.app-content .awards-form input,
+.app-content .awards-form textarea {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid #cbd5df;
+  border-radius: 0.6rem;
+  background: #fff;
+  color: var(--brand-ink);
+  font: inherit;
+  line-height: 1.4;
+}
+
+.app-content .awards-form input {
+  min-height: 2.9rem;
+}
+
+.app-content .awards-form textarea {
+  min-height: 8rem;
+}
+
+.app-content .awards-form input:focus,
+.app-content .awards-form textarea:focus {
+  border-color: var(--brand-accent-2);
+  outline: 3px solid rgba(29, 122, 115, 0.15);
+}
+
+.app-content .log-hours-form .btn-primary-wide {
+  min-height: 3.1rem;
+  border-radius: 0.65rem;
+  background: var(--brand-accent);
+  color: #fff;
+  font: inherit;
+  font-weight: 700;
+}
+
+.app-content .form-status-note {
+  margin: 0;
+  color: var(--brand-muted);
+  font-size: 0.92rem;
+  line-height: 1.4;
+}
+
+.app-content .leaderboard-table-wrap {
+  width: 100%;
+}
+
+.app-content .prizes-page .balance-box {
+  justify-content: center;
+  width: min(100%, 22rem);
+  min-width: 0;
+  gap: 0.4rem;
+}
+
+@media (max-width: 620px) {
+  .app-header {
+    flex-wrap: wrap;
+    gap: 0.4rem 0.75rem;
+    padding: 0.75rem 1rem;
+  }
+
+  .app-nav {
+    order: 3;
+    width: 100%;
+    justify-content: space-between;
+    gap: 0.25rem;
+  }
+
+  .app-shell .app-nav a {
+    justify-content: center;
+    padding-inline: 0.65rem;
+    font-size: 0.93rem;
+  }
+
+  .app-header-actions {
+    gap: 0.6rem;
+  }
+
+  .app-content {
+    width: min(100% - 1.25rem, 68rem);
+    margin-block: 1rem;
+  }
+
+  .app-content .workflow-page {
+    padding: 1.25rem;
+  }
+
+  .app-content .form-field-pair {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }

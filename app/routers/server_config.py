@@ -216,7 +216,7 @@ async def config_restart_action(request: Request):
         return gate
     flash(
         request,
-        "Restarting process… On Render the service will come back automatically; locally restart uvicorn if it stays down.",
+        "Restarting processâ€¦ On Render the service will come back automatically; locally restart uvicorn if it stays down.",
         "warning",
     )
     _schedule_restart()
@@ -268,7 +268,7 @@ async def config_seed_action(request: Request):
         created, skipped = _seed_demo_users()
         flash(
             request,
-            f"Seed done — created {created}, skipped {skipped}",
+            f"Seed done â€” created {created}, skipped {skipped}",
             "success",
         )
     except Exception as exc:  # noqa: BLE001
@@ -399,3 +399,12 @@ def _seed_demo_users() -> tuple[int, int]:
             )
             created += 1
     return created, skipped
+
+
+
+
+
+
+
+
+

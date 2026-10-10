@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated, Optional
 from fastapi import Depends, HTTPException, status, Request
 import jwt
 from jwt.exceptions import InvalidTokenError
@@ -30,6 +30,14 @@ async def get_current_user(request:Request, db:SessionDep)->User:
     if user is None:
         raise credentials_exception
     return user
+
+async def get_optional_current_user(request: Request, db: SessionDep) -> Optional[User]:
+    try:
+        return await get_current_user(request, db)
+    except HTTPException as exc:
+        if exc.status_code == status.HTTP_401_UNAUTHORIZED:
+            return None
+        raise
 
 async def is_logged_in(request: Request, db:SessionDep):
     try:

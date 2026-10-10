@@ -1,9 +1,65 @@
 {% extends "authenticated-base.html" %}
-{% block title %}Admin{% endblock %}
+{% block title %}Admin dashboard{% endblock %}
 
 {% block subpage_content %}
-<div class="container-fluid py-2">
-  <h1 class="h4 mb-2">Admin</h1>
-  <p class="text-muted mb-0">Admin workflow screens replace this shell in Phase 5 implement.</p>
+<div class="student-awards-dashboard admin-dashboard">
+  <section class="panel">
+    <div class="panel-head">
+      <h2>Pending volunteer approvals</h2>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Student</th>
+            <th>Activity</th>
+            <th>Date</th>
+            <th>Hours</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in pending_hours %}
+          <tr>
+            <td>{{ item.student.username }}</td>
+            <td>{{ item.activity_name }}</td>
+            <td>{{ item.volunteer_date }}</td>
+            <td>{{ item.hours }}h</td>
+            <td>
+              <div class="action-row">
+                <form method="post" action="{{ url_for('approve_hour', hour_id=item.id) }}">
+                  <button type="submit" class="btn-success-small">Approve</button>
+                </form>
+                <form method="post" action="{{ url_for('reject_hour', hour_id=item.id) }}">
+                  <button type="submit" class="btn-secondary-small">Reject</button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="5" class="muted-row">No submissions currently waiting for review.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="panel mt-4">
+    <div class="panel-head">
+      <h2>Leaderboard snapshot</h2>
+    </div>
+    <ol class="leaderboard-list compact">
+      {% for student, total_hours in leaderboard %}
+      <li>
+        <div><span class="rank">#{{ loop.index }}</span> <strong>{{ student.username }}</strong></div>
+        <span>{{ total_hours|round(1) }}h</span>
+      </li>
+      {% else %}
+      <li class="muted-row">No approved hours yet.</li>
+      {% endfor %}
+    </ol>
+  </section>
 </div>
 {% endblock %}

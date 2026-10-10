@@ -1,0 +1,33 @@
+{% extends "authenticated-base.html" %}
+{% block title %}Log Volunteer Hours | Student Awards{% endblock %}
+
+{% block subpage_content %}
+<section class="workflow-page log-hours-page">
+  <h1>Log Volunteer Hours</h1>
+  <form method="post" action="{{ url_for('submit_volunteer_hours') }}" class="awards-form log-hours-form">
+    <div class="form-field">
+      <label for="activity_name">Activity Name</label>
+      <input id="activity_name" name="activity_name" type="text" placeholder="Activity name" required>
+    </div>
+
+    <div class="form-field-pair">
+      <div class="form-field">
+        <label for="volunteer_date">Date</label>
+        <input id="volunteer_date" name="volunteer_date" type="date" required>
+      </div>
+      <div class="form-field">
+        <label for="hours">Hours</label>
+        <input id="hours" name="hours" type="number" min="0.5" step="0.5" placeholder="Hours" required>
+      </div>
+    </div>
+
+    <div class="form-field">
+      <label for="description">Description</label>
+      <textarea id="description" name="description" rows="5" placeholder="Description goes here"></textarea>
+    </div>
+
+    <button type="submit" class="btn-primary-wide">Submit for Approval</button>
+    <p class="form-status-note">Status: pending until approved</p>
+  </form>
+</section>
+{% endblock %}
