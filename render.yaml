@@ -11,7 +11,7 @@ services:
     plan: free
     region: oregon
     buildCommand: pip install -r requirements.txt
-    startCommand: python manage.py init --no-drop && python manage.py run --host 0.0.0.0 --port $PORT
+    startCommand: python manage.py init && python manage.py run --host 0.0.0.0 --port $PORT
     healthCheckPath: /health
     envVars:
       - key: PYTHON_VERSION

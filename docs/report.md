@@ -100,9 +100,9 @@ Local verification used the seeded accounts listed below. Phase 6 deployment has
 
 ## Deployed app
 
-Phase 6. Public Render URL (not localhost). Markers open this to mark the three workflows.
+Phase 6 deployment is live on Render. Public URL (not localhost); `GET /health` was verified and returned `{"ok":true}`:
 
-https://
+https://faststarter-n80u.onrender.com
 
 ## Logins
 
