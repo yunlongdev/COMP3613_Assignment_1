@@ -169,6 +169,7 @@ def export_report(
     *,
     name: str,
     student_id: str,
+    github: str | None = None,
     source: Path | None = None,
     output: Path | None = None,
 ) -> ReportExportResult:
@@ -177,8 +178,14 @@ def export_report(
     dest = output or DEFAULT_PDF
     clean_name = name.strip()
     clean_id = student_id.strip()
+    clean_github = github.strip() if github else ""
     if not clean_name or not clean_id:
         raise SystemExit("Report export needs both --name and --id.")
+    if clean_github and not re.fullmatch(
+        r"https://github\.com/[A-Za-z0-9-]{1,39}(?:/[A-Za-z0-9_.-]+)?/?",
+        clean_github,
+    ):
+        raise SystemExit("--github must be a GitHub profile or repository URL.")
 
     dest.parent.mkdir(parents=True, exist_ok=True)
     if not src.is_file():
@@ -232,7 +239,15 @@ def export_report(
 
     pdf = _new_pdf(bool(missing))
     with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
-        cover = _cover_html(clean_name, clean_id, app_url, logins, integrity, missing)
+        cover = _cover_html(
+            clean_name,
+            clean_id,
+            clean_github,
+            app_url,
+            logins,
+            integrity,
+            missing,
+        )
         body = _markdown_to_html(markdown, src.parent, Path(tmp))
         appendix = _markdown_to_html(
             appendix_markdown(transcripts),
@@ -580,6 +595,7 @@ def _write_report_html(pdf: ReportPDF, markup: str) -> None:
 def _cover_html(
     name: str,
     student_id: str,
+    github: str,
     app_url: str,
     logins: str,
     integrity: IntegrityResult,
@@ -592,9 +608,16 @@ def _cover_html(
     if len(root) > 28:
         root = f"{root[:12]}...{root[-10:]}"
     integrity_value = html_lib.escape(f"{integrity.status.upper()}. Root {root}")
+    github_value = (
+        f'<a href="{html_lib.escape(github, quote=True)}">'
+        f'{html_lib.escape(github)}</a>'
+        if github
+        else "Not provided"
+    )
     rows = [
         ("Student name", html_lib.escape(name), False),
         ("Student ID", html_lib.escape(student_id), False),
+        ("GitHub", github_value, False),
         ("Deployed app", html_lib.escape(app_url), False),
         ("Logins", login_html, False),
         ("Skill integrity", integrity_value, not integrity.ok),

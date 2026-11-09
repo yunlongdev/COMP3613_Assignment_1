@@ -1,0 +1,1717 @@
+{
+  "info": {
+    "name": "COMP3613 Assignment 2 - Student Awards API Tests",
+    "description": "API tests for the Student Awards app (FastAPI).\n\nRun order matters: use the Collection Runner (or `newman run`) and run the whole collection in order.\nPrerequisites: database seeded with `python manage.py init --drop` (users bob/admin, 3 awards with stock 10). The collection registers a fresh student on every run, and each run redeems one prize, so re-seed after ~10 runs.\nSelect the 'Local' or 'Render' environment to choose the server.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000"
+    },
+    {
+      "key": "adminUsername",
+      "value": "admin"
+    },
+    {
+      "key": "adminPassword",
+      "value": "adminpass"
+    },
+    {
+      "key": "studentPassword",
+      "value": "Passw0rd123"
+    },
+    {
+      "key": "awardId",
+      "value": "1"
+    },
+    {
+      "key": "studentUsername",
+      "value": ""
+    },
+    {
+      "key": "studentEmail",
+      "value": ""
+    },
+    {
+      "key": "hourApproveId",
+      "value": ""
+    },
+    {
+      "key": "hourRejectId",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "0 - Reset session",
+      "item": [
+        {
+          "name": "Log out any previous session",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 303 See Other\", function () { pm.response.to.have.status(303); });",
+                  "pm.test(\"Redirects to /login\", function () { pm.expect(pm.response.headers.get(\"Location\")).to.match(/\\/login$/); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/logout",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "logout"
+              ]
+            },
+            "description": "Clears a leftover access_token cookie from an earlier run."
+          },
+          "response": [],
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          }
+        }
+      ]
+    },
+    {
+      "name": "1 - Public endpoints",
+      "item": [
+        {
+          "name": "Health check",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Body is {ok: true}\", function () { pm.expect(pm.response.json()).to.eql({ ok: true }); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "health"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login page loads",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Returns HTML\", function () { pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"text/html\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Register page loads",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "register"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Leaderboard is public",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200 without logging in\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Page shows the Leaderboard heading\", function () { pm.expect(pm.response.text()).to.include(\"Leaderboard\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/leaderboard",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "leaderboard"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "2 - Authorization: anonymous user is blocked",
+      "item": [
+        {
+          "name": "GET /app without login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 401 Unauthorized\", function () { pm.response.to.have.status(401); });",
+                  "pm.test(\"Response is the Unauthorized page\", function () { pm.expect(pm.response.text()).to.include(\"Unauthorized\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/app",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "app"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET /app/log-hours without login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 401 Unauthorized\", function () { pm.response.to.have.status(401); });",
+                  "pm.test(\"Response is the Unauthorized page\", function () { pm.expect(pm.response.text()).to.include(\"Unauthorized\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/app/log-hours",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "app",
+                "log-hours"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET /app/prizes without login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 401 Unauthorized\", function () { pm.response.to.have.status(401); });",
+                  "pm.test(\"Response is the Unauthorized page\", function () { pm.expect(pm.response.text()).to.include(\"Unauthorized\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/app/prizes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "app",
+                "prizes"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET /admin without login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 401 Unauthorized\", function () { pm.response.to.have.status(401); });",
+                  "pm.test(\"Response is the Unauthorized page\", function () { pm.expect(pm.response.text()).to.include(\"Unauthorized\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST volunteer hours without login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 401 Unauthorized\", function () { pm.response.to.have.status(401); });",
+                  "pm.test(\"Response is the Unauthorized page\", function () { pm.expect(pm.response.text()).to.include(\"Unauthorized\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/app/volunteer-hours",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "app",
+                "volunteer-hours"
+              ]
+            },
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "activity_name",
+                  "value": "x",
+                  "type": "text"
+                },
+                {
+                  "key": "volunteer_date",
+                  "value": "2026-10-10",
+                  "type": "text"
+                },
+                {
+                  "key": "hours",
+                  "value": "1",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST redeem award without login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 401 Unauthorized\", function () { pm.response.to.have.status(401); });",
+                  "pm.test(\"Response is the Unauthorized page\", function () { pm.expect(pm.response.text()).to.include(\"Unauthorized\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/app/redeem-award/{{awardId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "app",
+                "redeem-award",
+                "{{awardId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST approve hour without login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 401 Unauthorized\", function () { pm.response.to.have.status(401); });",
+                  "pm.test(\"Response is the Unauthorized page\", function () { pm.expect(pm.response.text()).to.include(\"Unauthorized\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/approve-hour/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "approve-hour",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST reject hour without login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 401 Unauthorized\", function () { pm.response.to.have.status(401); });",
+                  "pm.test(\"Response is the Unauthorized page\", function () { pm.expect(pm.response.text()).to.include(\"Unauthorized\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/reject-hour/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "reject-hour",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "3 - Registration and login",
+      "item": [
+        {
+          "name": "Register new student",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const stamp = Date.now();",
+                  "pm.collectionVariables.set(\"studentUsername\", \"pm\" + stamp);",
+                  "pm.collectionVariables.set(\"studentEmail\", \"pm\" + stamp + \"@example.com\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 303 See Other\", function () { pm.response.to.have.status(303); });",
+                  "pm.test(\"Redirects to /login\", function () { pm.expect(pm.response.headers.get(\"Location\")).to.match(/\\/login$/); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "register"
+              ]
+            },
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "username",
+                  "value": "{{studentUsername}}",
+                  "type": "text"
+                },
+                {
+                  "key": "email",
+                  "value": "{{studentEmail}}",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "{{studentPassword}}",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          }
+        },
+        {
+          "name": "Register duplicate username is refused",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 303 See Other\", function () { pm.response.to.have.status(303); });",
+                  "pm.test(\"Redirects back to /register\", function () { pm.expect(pm.response.headers.get(\"Location\")).to.match(/\\/register$/); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "register"
+              ]
+            },
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "username",
+                  "value": "{{studentUsername}}",
+                  "type": "text"
+                },
+                {
+                  "key": "email",
+                  "value": "other-{{studentEmail}}",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "{{studentPassword}}",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          }
+        },
+        {
+          "name": "Register with missing field returns 422",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 422 Unprocessable Entity\", function () { pm.response.to.have.status(422); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "register"
+              ]
+            },
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "username",
+                  "value": "incomplete",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          }
+        },
+        {
+          "name": "Login with wrong password is refused",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 303 See Other\", function () { pm.response.to.have.status(303); });",
+                  "pm.test(\"Redirects back to /login\", function () { pm.expect(pm.response.headers.get(\"Location\")).to.match(/\\/login$/); });",
+                  "pm.test(\"No access_token cookie issued\", function () { pm.expect(pm.cookies.has(\"access_token\")).to.be.false; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "username",
+                  "value": "{{studentUsername}}",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "wrong-password",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          }
+        },
+        {
+          "name": "Login as student",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 303 See Other\", function () { pm.response.to.have.status(303); });",
+                  "pm.test(\"Redirects to student home /app\", function () { pm.expect(pm.response.headers.get(\"Location\")).to.match(/\\/app$/); });",
+                  "pm.test(\"access_token cookie is set\", function () { pm.expect(pm.cookies.has(\"access_token\")).to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "username",
+                  "value": "{{studentUsername}}",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "{{studentPassword}}",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          }
+        }
+      ]
+    },
+    {
+      "name": "4 - Student: log volunteer hours",
+      "item": [
+        {
+          "name": "Student home loads",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Shows the Log Volunteer Hours page\", function () { pm.expect(pm.response.text()).to.include(\"Log Volunteer Hours\"); });",
+                  "pm.test(\"Greets the logged-in student\", function () { pm.expect(pm.response.text()).to.include(\"Welcome, \"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/app",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "app"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Submit 15 valid hours",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 303 See Other\", function () { pm.response.to.have.status(303); });",
+                  "pm.test(\"Redirects to the log-hours page\", function () { pm.expect(pm.response.headers.get(\"Location\")).to.match(/\\/app\\/log-hours$/); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/app/volunteer-hours",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "app",
+                "volunteer-hours"
+              ]
+            },
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "activity_name",
+                  "value": "Postman Beach Clean-up",
+                  "type": "text"
+                },
+                {
+                  "key": "volunteer_date",
+                  "value": "2026-10-10",
+                  "type": "text"
+                },
+                {
+                  "key": "description",
+                  "value": "Created by Postman test run",
+                  "type": "text"
+                },
+                {
+                  "key": "hours",
+                  "value": "15",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          }
+        },
+        {
+          "name": "Submit 1 more hour (to be rejected later)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Final page loads (redirect followed)\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Confirmation message shown\", function () { pm.expect(pm.response.text()).to.include(\"Volunteer hours submitted for approval.\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/app/volunteer-hours",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "app",
+                "volunteer-hours"
+              ]
+            },
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "activity_name",
+                  "value": "Postman Reject Me",
+                  "type": "text"
+                },
+                {
+                  "key": "volunteer_date",
+                  "value": "2026-10-11",
+                  "type": "text"
+                },
+                {
+                  "key": "description",
+                  "value": "",
+                  "type": "text"
+                },
+                {
+                  "key": "hours",
+                  "value": "1",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Zero hours is refused",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Final page loads (redirect followed)\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Validation message shown\", function () { pm.expect(pm.response.text()).to.include(\"Hours must be greater than zero\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/app/volunteer-hours",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "app",
+                "volunteer-hours"
+              ]
+            },
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "activity_name",
+                  "value": "Bad hours",
+                  "type": "text"
+                },
+                {
+                  "key": "volunteer_date",
+                  "value": "2026-10-12",
+                  "type": "text"
+                },
+                {
+                  "key": "description",
+                  "value": "",
+                  "type": "text"
+                },
+                {
+                  "key": "hours",
+                  "value": "0",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Missing activity name returns 422",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 422\", function () { pm.response.to.have.status(422); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/app/volunteer-hours",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "app",
+                "volunteer-hours"
+              ]
+            },
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "volunteer_date",
+                  "value": "2026-10-12",
+                  "type": "text"
+                },
+                {
+                  "key": "hours",
+                  "value": "2",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          }
+        },
+        {
+          "name": "Invalid date returns 422",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 422\", function () { pm.response.to.have.status(422); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/app/volunteer-hours",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "app",
+                "volunteer-hours"
+              ]
+            },
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "activity_name",
+                  "value": "x",
+                  "type": "text"
+                },
+                {
+                  "key": "volunteer_date",
+                  "value": "not-a-date",
+                  "type": "text"
+                },
+                {
+                  "key": "hours",
+                  "value": "2",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          }
+        },
+        {
+          "name": "Pending hours do not add to balance",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Balance is still 0.0 Hours\", function () { pm.expect(pm.response.text()).to.include(\"0.0 Hours\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/app/prizes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "app",
+                "prizes"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Redeem with insufficient hours is refused",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Final page loads (redirect followed)\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Insufficient hours message shown\", function () { pm.expect(pm.response.text()).to.include(\"Insufficient hours\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/app/redeem-award/{{awardId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "app",
+                "redeem-award",
+                "{{awardId}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "5 - Authorization: student cannot use admin features",
+      "item": [
+        {
+          "name": "Student cannot open admin dashboard",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 401 Unauthorized\", function () { pm.response.to.have.status(401); });",
+                  "pm.test(\"Response is the Unauthorized page\", function () { pm.expect(pm.response.text()).to.include(\"Unauthorized\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Student cannot approve hours",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 401 Unauthorized\", function () { pm.response.to.have.status(401); });",
+                  "pm.test(\"Response is the Unauthorized page\", function () { pm.expect(pm.response.text()).to.include(\"Unauthorized\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/approve-hour/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "approve-hour",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Student cannot reject hours",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 401 Unauthorized\", function () { pm.response.to.have.status(401); });",
+                  "pm.test(\"Response is the Unauthorized page\", function () { pm.expect(pm.response.text()).to.include(\"Unauthorized\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/reject-hour/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "reject-hour",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "6 - Admin: approve and reject hours",
+      "item": [
+        {
+          "name": "Login as admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 303 See Other\", function () { pm.response.to.have.status(303); });",
+                  "pm.test(\"Redirects to admin dashboard\", function () { pm.expect(pm.response.headers.get(\"Location\")).to.match(/\\/admin$/); });",
+                  "pm.test(\"access_token cookie is set\", function () { pm.expect(pm.cookies.has(\"access_token\")).to.be.true; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "username",
+                  "value": "{{adminUsername}}",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "{{adminPassword}}",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          }
+        },
+        {
+          "name": "Admin dashboard lists pending hours",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Shows pending approvals panel\", function () { pm.expect(pm.response.text()).to.include(\"Pending volunteer approvals\"); });",
+                  "pm.test(\"Shows the student's submission\", function () { pm.expect(pm.response.text()).to.include(\"Postman Beach Clean-up\"); });",
+                  "const ids = [];",
+                  "const re = /approve-hour\\/(\\d+)/g;",
+                  "let m;",
+                  "while ((m = re.exec(pm.response.text())) !== null) { ids.push(m[1]); }",
+                  "pm.test(\"At least two pending entries found\", function () { pm.expect(ids.length).to.be.at.least(2); });",
+                  "// Pending list is oldest-first, so this run's two entries are the last two.",
+                  "pm.collectionVariables.set(\"hourApproveId\", ids[ids.length - 2]);",
+                  "pm.collectionVariables.set(\"hourRejectId\", ids[ids.length - 1]);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Approve the 15-hour entry",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Final page loads (redirect followed)\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Approval confirmation shown\", function () { pm.expect(pm.response.text()).to.include(\"Volunteer hours approved.\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/approve-hour/{{hourApproveId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "approve-hour",
+                "{{hourApproveId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Reject the 1-hour entry",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Final page loads (redirect followed)\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Rejection confirmation shown\", function () { pm.expect(pm.response.text()).to.include(\"Volunteer hours rejected.\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/reject-hour/{{hourRejectId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "reject-hour",
+                "{{hourRejectId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Approve unknown entry shows error",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Final page loads (redirect followed)\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Not-found message shown\", function () { pm.expect(pm.response.text()).to.include(\"Volunteer hour not found\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/approve-hour/999999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "approve-hour",
+                "999999"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "7 - Student: leaderboard and redeem prize",
+      "item": [
+        {
+          "name": "Login as student again",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 303 See Other\", function () { pm.response.to.have.status(303); });",
+                  "pm.test(\"Redirects to student home /app\", function () { pm.expect(pm.response.headers.get(\"Location\")).to.match(/\\/app$/); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "username",
+                  "value": "{{studentUsername}}",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "{{studentPassword}}",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          }
+        },
+        {
+          "name": "Leaderboard shows student with 15 approved hours",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Student appears on leaderboard\", function () { pm.expect(pm.response.text()).to.include(pm.collectionVariables.get(\"studentUsername\")); });",
+                  "pm.test(\"Shows 15.0 total approved hours\", function () { pm.expect(pm.response.text()).to.include(\"15.0\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/leaderboard",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "leaderboard"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Prizes page shows 15.0 hour balance",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Balance is 15.0 Hours\", function () { pm.expect(pm.response.text()).to.include(\"15.0 Hours\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/app/prizes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "app",
+                "prizes"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Redeem prize (cost 15 hours)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Final page loads (redirect followed)\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Success message shown\", function () { pm.expect(pm.response.text()).to.include(\"You redeemed\"); });",
+                  "pm.test(\"Balance is deducted to 0.0 Hours\", function () { pm.expect(pm.response.text()).to.include(\"0.0 Hours\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/app/redeem-award/{{awardId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "app",
+                "redeem-award",
+                "{{awardId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Redeem again fails - no hours left",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Final page loads (redirect followed)\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Insufficient hours message shown\", function () { pm.expect(pm.response.text()).to.include(\"Insufficient hours\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/app/redeem-award/{{awardId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "app",
+                "redeem-award",
+                "{{awardId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Redeem unknown award shows error",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Final page loads (redirect followed)\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Not-found message shown\", function () { pm.expect(pm.response.text()).to.include(\"Award not found\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/app/redeem-award/999999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "app",
+                "redeem-award",
+                "999999"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Redeem non-numeric award id returns 422",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 422\", function () { pm.response.to.have.status(422); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/app/redeem-award/abc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "app",
+                "redeem-award",
+                "abc"
+              ]
+            }
+          },
+          "response": [],
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          }
+        }
+      ]
+    },
+    {
+      "name": "8 - JSON API",
+      "item": [
+        {
+          "name": "GET /api/users returns JSON user list",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Content-Type is JSON\", function () { pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\"); });",
+                  "const users = pm.response.json();",
+                  "pm.test(\"Body is an array\", function () { pm.expect(users).to.be.an(\"array\"); });",
+                  "pm.test(\"Each user has exactly id, username, email\", function () { users.forEach(function (u) { pm.expect(Object.keys(u).sort()).to.eql([\"email\", \"id\", \"username\"]); }); });",
+                  "pm.test(\"Password is never exposed\", function () { pm.expect(pm.response.text()).to.not.include(\"password\"); });",
+                  "pm.test(\"Seeded and newly registered users are present\", function () { const names = users.map(function (u) { return u.username; }); pm.expect(names).to.include(\"admin\"); pm.expect(names).to.include(pm.collectionVariables.get(\"studentUsername\")); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "9 - Logout",
+      "item": [
+        {
+          "name": "Log out",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 303 See Other\", function () { pm.response.to.have.status(303); });",
+                  "pm.test(\"Redirects to /login\", function () { pm.expect(pm.response.headers.get(\"Location\")).to.match(/\\/login$/); });",
+                  "pm.test(\"access_token cookie is cleared\", function () { pm.expect(pm.cookies.has(\"access_token\")).to.be.false; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/logout",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "logout"
+              ]
+            }
+          },
+          "response": [],
+          "protocolProfileBehavior": {
+            "followRedirects": false
+          }
+        },
+        {
+          "name": "Session is unusable after logout",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 401 Unauthorized\", function () { pm.response.to.have.status(401); });",
+                  "pm.test(\"Response is the Unauthorized page\", function () { pm.expect(pm.response.text()).to.include(\"Unauthorized\"); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/app",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "app"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

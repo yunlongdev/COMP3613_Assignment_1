@@ -1,0 +1,52 @@
+digraph ERD {
+  graph [rankdir=LR, bgcolor="white", nodesep=0.7, ranksep=1.3, fontname="Helvetica", pad=0.3];
+  node  [shape=plain, fontname="Helvetica", fontsize=11];
+  edge  [fontname="Helvetica", fontsize=10, color="#1f3a5f", penwidth=1.4, arrowtail=tee, arrowhead=crow, dir=both];
+
+  user [label=<
+    <table border="0" cellborder="1" cellspacing="0" cellpadding="5">
+      <tr><td bgcolor="#1f3a5f"><font color="white"><b>USER</b></font></td></tr>
+      <tr><td align="left">id : int  <b>PK</b></td></tr>
+      <tr><td align="left">username : str  <b>UNIQUE</b></td></tr>
+      <tr><td align="left">email : str  <b>UNIQUE</b></td></tr>
+      <tr><td align="left">password : str (hashed)</td></tr>
+      <tr><td align="left">role : str  (regular_user | admin)</td></tr>
+    </table>>];
+
+  hour [label=<
+    <table border="0" cellborder="1" cellspacing="0" cellpadding="5">
+      <tr><td bgcolor="#1f3a5f"><font color="white"><b>VOLUNTEER_HOUR</b></font></td></tr>
+      <tr><td align="left">id : int  <b>PK</b></td></tr>
+      <tr><td align="left">student_id : int  <b>FK → USER.id</b></td></tr>
+      <tr><td align="left">activity_name : str</td></tr>
+      <tr><td align="left">volunteer_date : date</td></tr>
+      <tr><td align="left">description : str</td></tr>
+      <tr><td align="left">hours : float  (&gt; 0)</td></tr>
+      <tr><td align="left">status : str  (Pending | Approved | Rejected)</td></tr>
+      <tr><td align="left">created_at : datetime</td></tr>
+    </table>>];
+
+  redemption [label=<
+    <table border="0" cellborder="1" cellspacing="0" cellpadding="5">
+      <tr><td bgcolor="#1f3a5f"><font color="white"><b>AWARD_REDEMPTION</b></font></td></tr>
+      <tr><td align="left">id : int  <b>PK</b></td></tr>
+      <tr><td align="left">student_id : int  <b>FK → USER.id</b></td></tr>
+      <tr><td align="left">award_id : int  <b>FK → AWARD.id</b></td></tr>
+      <tr><td align="left">hours_used : int</td></tr>
+      <tr><td align="left">redeemed_at : datetime</td></tr>
+    </table>>];
+
+  award [label=<
+    <table border="0" cellborder="1" cellspacing="0" cellpadding="5">
+      <tr><td bgcolor="#1f3a5f"><font color="white"><b>AWARD</b></font></td></tr>
+      <tr><td align="left">id : int  <b>PK</b></td></tr>
+      <tr><td align="left">name : str  <b>UNIQUE</b></td></tr>
+      <tr><td align="left">description : str</td></tr>
+      <tr><td align="left">cost_in_hours : int</td></tr>
+      <tr><td align="left">quantity_available : int</td></tr>
+    </table>>];
+
+  user -> hour       [label=" submits (1 : many)"];
+  user -> redemption [label=" redeems (1 : many)"];
+  award -> redemption [label=" redeemed as (1 : many)"];
+}

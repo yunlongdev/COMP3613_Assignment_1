@@ -144,6 +144,7 @@ def cmd_report(args: argparse.Namespace) -> None:
     result = export_report(
         name=args.name,
         student_id=args.student_id,
+        github=args.github,
         source=None if args.src is None else Path(args.src),
         output=None if args.output is None else Path(args.output),
     )
@@ -252,6 +253,7 @@ def build_parser() -> argparse.ArgumentParser:
     report = subparsers.add_parser("report", help="Build the assignment report bundle")
     report.add_argument("--name", required=True)
     report.add_argument("--id", dest="student_id", required=True)
+    report.add_argument("--github", default=None, help="GitHub profile or repository URL for the PDF cover")
     report.add_argument("--src", default=None)
     report.add_argument("--output", default=None)
     report.set_defaults(func=cmd_report)
